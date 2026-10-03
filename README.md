@@ -31,3 +31,7 @@ Para añadir fotos a una obra, coloca las imágenes junto a su `.md` y referénc
 
 - Hosting: Cloudflare Pages (proyecto `ingesuelosconcalidad`).
 - DNS: Cloudflare. El dominio y el correo siguen registrados en Dongee.
+
+## Licencia
+
+Código publicado solo para consulta: todos los derechos reservados. El contenido, la marca y las fotografías pertenecen a Ingesuelos Concalidad S.A.S. Ver [LICENSE](LICENSE).
