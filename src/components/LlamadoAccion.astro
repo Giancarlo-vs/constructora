@@ -1,0 +1,25 @@
+---
+import Estratos from './Estratos.astro';
+import { whatsappUrl } from '../data/empresa';
+import { idiomaActual, ruta, textos } from '../i18n/ui';
+
+const idioma = idiomaActual(Astro.currentLocale);
+const t = textos[idioma];
+---
+
+<section class="contenedor py-20">
+  <div class="relative overflow-hidden rounded-3xl bg-noche px-8 py-14 text-claro sm:px-14">
+    <Estratos semilla="cta" class="absolute inset-y-0 right-0 hidden h-full w-1/2 opacity-90 md:block [mask-image:linear-gradient(to_right,transparent,black_45%)]" />
+    <div class="relative max-w-lg">
+      <p class="eyebrow text-ochre!">{t.cta.antetitulo}</p>
+      <h2 class="mt-3 text-3xl font-bold sm:text-4xl">{t.cta.titulo}</h2>
+      <p class="mt-4 text-claro/70">{t.cta.texto}</p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a href={ruta(idioma, 'contacto')} class="btn btn-primary">{t.cotizar}</a>
+        <a href={whatsappUrl(t.whatsappMensaje)} target="_blank" rel="noopener" class="btn ring-1 ring-claro/30 hover:bg-claro hover:text-noche">
+          {t.whatsapp}
+        </a>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,28 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Portada from './Portada.astro';
+import { idiomaActual, proyectoEn, ruta } from '../i18n/ui';
+
+interface Props {
+  proyecto: CollectionEntry<'proyectos'>;
+}
+const { proyecto } = Astro.props;
+const idioma = idiomaActual(Astro.currentLocale);
+const { titulo, nombreCategoria, ubicacion, anio, portada } = proyectoEn(proyecto, idioma);
+---
+
+<a href={ruta(idioma, 'proyectos', proyecto.id)} class="group block">
+  <div class="relative aspect-4/3 overflow-hidden rounded-2xl bg-sand">
+    <Portada
+      imagen={portada}
+      alt={titulo}
+      semilla={proyecto.id}
+      class="transition-transform duration-700 ease-out group-hover:scale-105"
+    />
+    <span class="absolute left-3 top-3 rounded-full bg-paper/90 px-3 py-1 text-xs font-semibold backdrop-blur">
+      {nombreCategoria}
+    </span>
+  </div>
+  <h3 class="mt-4 text-lg font-semibold leading-snug transition-colors group-hover:text-clay">{titulo}</h3>
+  {(ubicacion || anio) && <p class="mt-1 text-sm text-muted">{[ubicacion, anio].filter(Boolean).join(' · ')}</p>}
+</a>

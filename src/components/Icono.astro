@@ -1,0 +1,35 @@
+---
+import type { IconoServicio } from '../content.config';
+
+interface Props {
+  nombre: IconoServicio | 'flecha';
+  class?: string;
+}
+const { nombre, class: className = 'size-6' } = Astro.props;
+
+const trazos: Record<Props['nombre'], string> = {
+  tierra: 'M2 20h20M4 20l2-5h7l1 5M8 15V9h4l3 3M15 12l4-4 2 2-3 3M6 10h2',
+  via: 'M8 3 4 21M16 3l4 18M12 4v3M12 10v4M12 17v3',
+  puente: 'M2 15h20M4 15v5M20 15v5M2 9c4 0 6 6 10 6s6-6 10-6M8 12v3M12 15v-2M16 12v3',
+  edificio: 'M4 21V9l8-5 8 5v12M4 21h16M9 21v-5h6v5M8 11h2M14 11h2',
+  redes: 'M3 8h7v8H3zM14 8h7v8h-7zM10 12h4M6.5 4v4M17.5 16v4',
+  interventoria: 'M9 4h6v3H9zM7 5.5H5v15h14v-15h-2M9 12l2 2 4-4M9 17h6',
+  perforacion: 'M6 3h12M8 7h8M12 3v13M9 16l3 5 3-5z',
+  laboratorio: 'M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.7 3h10.6a2 2 0 0 0 1.7-3l-5-9V3M7.5 15h9',
+  codigo: 'M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14',
+  flecha: 'M5 12h14M13 6l6 6-6 6',
+};
+---
+
+<svg
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.6"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  class={className}
+  aria-hidden="true"
+>
+  <path d={trazos[nombre]} />
+</svg>

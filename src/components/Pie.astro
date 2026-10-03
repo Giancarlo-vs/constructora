@@ -1,0 +1,56 @@
+---
+import Logo from './Logo.astro';
+import { disenador, empresa, telefonoHref, whatsappUrl } from '../data/empresa';
+import { idiomaActual, ruta, textos } from '../i18n/ui';
+
+const idioma = idiomaActual(Astro.currentLocale);
+const t = textos[idioma];
+const anio = new Date().getFullYear();
+---
+
+<footer class="bg-noche text-claro/70">
+  <div class="contenedor grid gap-12 py-16 md:grid-cols-[1.4fr_1fr_1fr]">
+    <div class="max-w-sm">
+      <Logo claro />
+      <p class="mt-5 text-sm leading-relaxed">{empresa.descripcion[idioma]}</p>
+    </div>
+
+    <div>
+      <h2 class="eyebrow text-ochre!">{t.pie.navegacion}</h2>
+      <ul class="mt-4 space-y-2.5 text-sm">
+        <li><a class="hover:text-claro" href={ruta(idioma, 'servicios')}>{t.menu.servicios}</a></li>
+        <li><a class="hover:text-claro" href={ruta(idioma, 'proyectos')}>{t.menu.proyectos}</a></li>
+        <li><a class="hover:text-claro" href={ruta(idioma, 'nosotros')}>{t.menu.nosotros}</a></li>
+        <li><a class="hover:text-claro" href={ruta(idioma, 'contacto')}>{t.menu.contacto}</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <h2 class="eyebrow text-ochre!">{t.pie.contacto}</h2>
+      <ul class="mt-4 space-y-2.5 text-sm">
+        {
+          empresa.telefonos.map((tel) => (
+            <li>
+              <a class="hover:text-claro" href={telefonoHref(tel.numero)}>
+                {tel.etiqueta[idioma]}: {tel.numero}
+              </a>
+            </li>
+          ))
+        }
+        <li><a class="hover:text-claro" href={whatsappUrl(t.whatsappMensaje)} target="_blank" rel="noopener">WhatsApp</a></li>
+        <li><a class="hover:text-claro break-all" href={`mailto:${empresa.email}`}>{empresa.email}</a></li>
+        <li>{empresa.direccion}, {empresa.ciudad}</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="border-t border-claro/10">
+    <div class="contenedor flex flex-col gap-2 py-6 text-xs sm:flex-row sm:justify-between">
+      <p>© {anio} {empresa.nombre} · NIT {empresa.nit}</p>
+      <p>
+        {t.pie.credito}:
+        <a class="underline decoration-claro/30 underline-offset-2 hover:text-claro" href={`mailto:${disenador.email}`}>{disenador.email}</a>
+      </p>
+    </div>
+  </div>
+</footer>

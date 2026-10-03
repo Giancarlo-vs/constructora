@@ -1,0 +1,8 @@
+---
+import Vista from '../../../vistas/Proyecto.astro';
+import { rutasProyectos } from '../../../vistas/rutas';
+
+export const getStaticPaths = rutasProyectos;
+---
+
+<Vista {...Astro.props} />

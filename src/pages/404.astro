@@ -1,0 +1,22 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Estratos from '../components/Estratos.astro';
+---
+
+<Layout titulo="Página no encontrada · Page not found">
+  <section class="contenedor grid items-center gap-12 py-20 md:grid-cols-2">
+    <div>
+      <p class="eyebrow">Error 404</p>
+      <h1 class="mt-3 text-5xl font-bold sm:text-6xl">Aquí no encontramos nada firme.</h1>
+      <p class="mt-5 text-lg text-muted">La página que busca no existe o fue movida.</p>
+      <p class="mt-2 text-muted" lang="en">The page you are looking for does not exist or has been moved.</p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a href="/" class="btn btn-primary">Volver al inicio</a>
+        <a href="/en" class="btn btn-ghost" lang="en">Go to homepage</a>
+      </div>
+    </div>
+    <div class="aspect-square overflow-hidden rounded-3xl bg-sand">
+      <Estratos semilla="404" sondeo class="h-full w-full" />
+    </div>
+  </section>
+</Layout>

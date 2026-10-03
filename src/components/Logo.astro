@@ -1,0 +1,25 @@
+---
+// Logo provisional en SVG inspirado en el logotipo real (cilindro gris + cubo naranja).
+// PENDIENTE: reemplazar por el PNG oficial cuando esté disponible.
+import { empresa } from '../data/empresa';
+import { idiomaActual, ruta } from '../i18n/ui';
+interface Props {
+  claro?: boolean;
+}
+const { claro = false } = Astro.props;
+const idioma = idiomaActual(Astro.currentLocale);
+---
+
+<a href={ruta(idioma, 'inicio')} class="flex items-center gap-2.5" aria-label={`${empresa.nombre} – ${idioma === 'es' ? 'inicio' : 'home'}`}>
+  <svg viewBox="0 0 32 32" class="size-9" aria-hidden="true">
+    <ellipse cx="14" cy="27" rx="12" ry="3.2" class:list={[claro ? 'fill-[#5b7983]' : 'fill-[#c9cdd1] dark:fill-[#5b7983]']} />
+    <path d="M7 5.5v20c0 1.4 2.2 2.5 5 2.5s5-1.1 5-2.5v-20z" fill="#8a8f94" />
+    <ellipse cx="12" cy="5.5" rx="5" ry="2.2" fill="#b3b7bb" />
+    <path d="M14 15h11v11H14z" fill="#e36c0a" />
+    <path d="M14 15l3-2.5h11L25 15zM25 15l3-2.5v11L25 26z" fill="#b84d08" />
+  </svg>
+  <span class="leading-none">
+    <span class:list={['block font-display text-lg font-bold', claro ? 'text-claro' : 'text-ink']}>{empresa.nombreCorto}</span>
+    <span class:list={['block text-[0.7rem] font-semibold tracking-wide', claro ? 'text-ochre' : 'text-clay']}>Concalidad S.A.S.</span>
+  </span>
+</a>

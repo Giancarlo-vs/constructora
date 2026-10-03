@@ -1,0 +1,85 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/* Modo oscuro controlado por el atributo data-theme del <html>
+   (lo fija el script del Layout según la preferencia guardada o la del sistema). */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme {
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Archivo Variable", "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+
+  /* Paleta: azul petróleo y naranja del logotipo + tonos tierra.
+     ink/paper/sand/muted/clay cambian con el tema. */
+  --color-ink: #0e3440;
+  --color-paper: #f7f4ee;
+  --color-sand: #ebe3d4;
+  --color-clay: #b84d08;
+  --color-clay-dark: #943d05;
+  --color-sobre-clay: #ffffff;
+  --color-muted: #5f6468;
+
+  /* Fijos en ambos temas: secciones oscuras (pie, llamados) y acentos. */
+  --color-noche: #0e3440;
+  --color-claro: #f7f4ee;
+  --color-ochre: #f0a04b;
+  --color-naranja: #e36c0a;
+  --color-acero: #8a8f94;
+}
+
+[data-theme="dark"] {
+  --color-ink: #e8edef;
+  --color-paper: #0b1a20;
+  --color-sand: #17313b;
+  --color-clay: #f28a45;
+  --color-clay-dark: #f6a46c;
+  --color-sobre-clay: #0b1a20;
+  --color-muted: #9babb1;
+  --color-noche: #10303b;
+  color-scheme: dark;
+}
+
+/* Transiciones suaves entre páginas, sin JavaScript */
+@view-transition {
+  navigation: auto;
+}
+
+html {
+  scroll-behavior: smooth;
+  color-scheme: light;
+}
+
+body {
+  @apply bg-paper text-ink font-sans antialiased;
+}
+
+h1, h2, h3, .font-display {
+  font-family: var(--font-display);
+  font-stretch: 112%;
+  letter-spacing: -0.02em;
+}
+
+::selection {
+  background: var(--color-ochre);
+  color: var(--color-ink);
+}
+
+@utility eyebrow {
+  @apply text-xs font-semibold tracking-[0.18em] uppercase text-clay;
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-clay;
+}
+
+@utility btn-primary {
+  @apply bg-clay text-sobre-clay hover:bg-clay-dark;
+}
+
+@utility btn-ghost {
+  @apply ring-1 ring-ink/20 hover:bg-ink hover:text-paper;
+}
+
+@utility contenedor {
+  @apply mx-auto w-full max-w-6xl px-5 sm:px-8;
+}

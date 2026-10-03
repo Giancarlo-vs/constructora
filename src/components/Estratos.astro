@@ -1,0 +1,68 @@
+---
+// Ilustración generativa de un perfil de suelo. Cada "semilla" produce
+// un dibujo distinto pero siempre el mismo, así cada proyecto sin foto
+// tiene una portada propia.
+interface Props {
+  semilla: string;
+  sondeo?: boolean;
+  class?: string;
+}
+const { semilla, sondeo = false, class: className } = Astro.props;
+
+let h = 2166136261;
+for (const c of semilla) {
+  h ^= c.charCodeAt(0);
+  h = Math.imul(h, 16777619);
+}
+const azar = () => {
+  h ^= h << 13;
+  h ^= h >>> 17;
+  h ^= h << 5;
+  return ((h >>> 0) % 10000) / 10000;
+};
+
+const tonos = ['#ebe3d4', '#dccaa8', '#c9a46e', '#e36c0a', '#8a5a3b', '#8a8f94', '#2b4a54', '#0e3440'];
+const W = 800;
+const H = 600;
+const capas = 6;
+const desfase = Math.floor(azar() * 2);
+
+const bandas = Array.from({ length: capas }, (_, i) => {
+  const base = 70 + (i * (H - 70)) / capas + (azar() - 0.5) * 36;
+  const amp = 8 + azar() * 30;
+  const fase = azar() * Math.PI * 2;
+  const frec = 0.6 + azar() * 1.4;
+  const puntos: string[] = [];
+  for (let x = 0; x <= W; x += 20) {
+    const y = base + Math.sin((x / W) * Math.PI * 2 * frec + fase) * amp;
+    puntos.push(`${x},${y.toFixed(1)}`);
+  }
+  return {
+    d: `M${puntos.join(' L')} L${W},${H} L0,${H} Z`,
+    color: tonos[Math.min(i + desfase + 1, tonos.length - 1)],
+    yCentro: base,
+  };
+});
+
+const xSondeo = 220 + azar() * 360;
+---
+
+<svg
+  viewBox={`0 0 ${W} ${H}`}
+  preserveAspectRatio="xMidYMid slice"
+  class={className}
+  aria-hidden="true"
+>
+  <rect width={W} height={H} fill={tonos[0]} />
+  {bandas.map((b) => <path d={b.d} fill={b.color} />)}
+  {
+    sondeo && (
+      <g stroke="#f7f4ee" stroke-width="2.5" fill="none">
+        <line x1={xSondeo} y1="40" x2={xSondeo} y2={H} stroke-dasharray="8 7" />
+        {bandas.map((b) => (
+          <circle cx={xSondeo} cy={b.yCentro + 24} r="6" fill="#f7f4ee" />
+        ))}
+      </g>
+    )
+  }
+</svg>

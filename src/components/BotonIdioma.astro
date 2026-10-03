@@ -1,0 +1,23 @@
+---
+// Enlace a la misma página en el otro idioma (sin JavaScript).
+import { idiomaActual, rutaEquivalente, textos } from '../i18n/ui';
+
+const idioma = idiomaActual(Astro.currentLocale);
+const otro = idioma === 'es' ? 'en' : 'es';
+const t = textos[idioma];
+---
+
+<a
+  href={rutaEquivalente(Astro.url.pathname, otro)}
+  hreflang={otro}
+  lang={otro}
+  aria-label={t.idioma.aria}
+  title={t.idioma.etiqueta}
+  class="flex h-10 items-center gap-1.5 rounded-full px-3 text-xs font-semibold tracking-wide text-ink/70 ring-1 ring-ink/15 transition-colors hover:bg-sand hover:text-ink"
+>
+  <svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+    <circle cx="12" cy="12" r="9" />
+    <path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z" />
+  </svg>
+  {otro.toUpperCase()}
+</a>

@@ -1,0 +1,130 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+import Encabezado from '../components/Encabezado.astro';
+import { empresa, telefonoHref, whatsappUrl } from '../data/empresa';
+import { idiomaActual, servicioEn, textos } from '../i18n/ui';
+
+const idioma = idiomaActual(Astro.currentLocale);
+const t = textos[idioma];
+const c = t.contacto;
+const servicios = (await getCollection('servicios'))
+  .sort((a, b) => a.data.orden - b.data.orden)
+  .map((s) => servicioEn(s, idioma).titulo);
+
+const datos = [
+  ...empresa.telefonos.map((tel) => ({
+    etiqueta: `${c.telefono} ${tel.etiqueta[idioma].toLowerCase()}`,
+    valor: tel.numero,
+    href: telefonoHref(tel.numero),
+  })),
+  { etiqueta: 'WhatsApp', valor: c.escribanos, href: whatsappUrl(t.whatsappMensaje) },
+  { etiqueta: c.correo, valor: empresa.email, href: `mailto:${empresa.email}` },
+  { etiqueta: c.direccion, valor: `${empresa.direccion}, ${empresa.ciudad}, ${c.pais}` },
+];
+
+// Textos del mensaje de WhatsApp que arma el formulario.
+const mensaje = {
+  numero: empresa.whatsapp,
+  saludo: t.whatsappMensaje,
+  etiquetas: { nombre: c.nombre, empresa: c.empresa, telefono: c.telefono, correo: c.correo, servicio: c.servicio, mensaje: c.wa.proyecto },
+};
+---
+
+<Layout titulo={t.menu.contacto} descripcion={c.descripcion(empresa.nombre)}>
+  <Encabezado antetitulo={t.menu.contacto} titulo={c.titulo} texto={c.texto} />
+
+  <section class="contenedor grid gap-12 pb-24 lg:grid-cols-[1fr_22rem]">
+    <form
+      id="formulario"
+      action={empresa.formAction || undefined}
+      method="post"
+      class="grid gap-5 rounded-3xl bg-sand/60 p-6 sm:grid-cols-2 sm:p-10"
+    >
+      <label class="campo">
+        <span>{c.nombre}</span>
+        <input name="nombre" required autocomplete="name" />
+      </label>
+      <label class="campo">
+        <span>{c.empresa} <em>{c.opcional}</em></span>
+        <input name="empresa" autocomplete="organization" />
+      </label>
+      <label class="campo">
+        <span>{c.telefono}</span>
+        <input name="telefono" type="tel" required autocomplete="tel" />
+      </label>
+      <label class="campo">
+        <span>{c.correo}</span>
+        <input name="correo" type="email" autocomplete="email" />
+      </label>
+      <label class="campo sm:col-span-2">
+        <span>{c.servicio}</span>
+        <select name="servicio">
+          {servicios.map((s) => <option>{s}</option>)}
+          <option>{c.otro}</option>
+        </select>
+      </label>
+      <label class="campo sm:col-span-2">
+        <span>{c.mensaje}</span>
+        <textarea name="mensaje" rows="5" required placeholder={c.placeholder}></textarea>
+      </label>
+      <div class="flex flex-wrap items-center gap-4 sm:col-span-2">
+        <button type="submit" class="btn btn-primary">{c.enviar}</button>
+        {!empresa.formAction && <p class="text-xs text-muted">{c.aviso}</p>}
+      </div>
+    </form>
+
+    <aside>
+      <dl class="divide-y divide-ink/10">
+        {
+          datos.map((d) => (
+            <div class="py-5">
+              <dt class="eyebrow">{d.etiqueta}</dt>
+              <dd class="mt-1.5 font-medium">
+                {d.href ? (
+                  <a href={d.href} class="hover:text-clay break-all" {...(d.href.startsWith('http') ? { target: '_blank', rel: 'noopener' } : {})}>
+                    {d.valor}
+                  </a>
+                ) : (
+                  d.valor
+                )}
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+    </aside>
+  </section>
+</Layout>
+
+{
+  !empresa.formAction && (
+    <script is:inline define:vars={{ mensaje }}>
+      document.getElementById('formulario').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const d = new FormData(e.target);
+        const lineas = [
+          mensaje.saludo,
+          ...Object.entries(mensaje.etiquetas)
+            .filter(([campo]) => d.get(campo))
+            .map(([campo, etiqueta]) => `${etiqueta}: ${d.get(campo)}`),
+        ];
+        window.open(`https://wa.me/${mensaje.numero}?text=${encodeURIComponent(lineas.join('\n'))}`, '_blank', 'noopener');
+      });
+    </script>
+  )
+}
+
+<style>
+  @reference "../styles/global.css";
+
+  .campo {
+    @apply flex flex-col gap-2 text-sm font-medium;
+  }
+  .campo em {
+    @apply font-normal not-italic text-muted;
+  }
+  .campo :is(input, select, textarea) {
+    @apply w-full rounded-xl border-0 bg-paper px-4 py-3 text-base font-normal ring-1 ring-ink/15 transition-shadow outline-none focus:ring-2 focus:ring-clay;
+  }
+</style>

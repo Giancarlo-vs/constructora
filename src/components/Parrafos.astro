@@ -1,0 +1,9 @@
+---
+// Texto plano a párrafos (separados por línea en blanco). Se usa para las descripciones en inglés.
+interface Props {
+  texto: string;
+}
+const parrafos = Astro.props.texto.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+---
+
+{parrafos.map((p) => <p>{p}</p>)}

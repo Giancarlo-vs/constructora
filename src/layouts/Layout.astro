@@ -1,0 +1,78 @@
+---
+import '@fontsource-variable/inter';
+import '@fontsource-variable/archivo/wdth.css';
+import '../styles/global.css';
+import Cabecera from '../components/Cabecera.astro';
+import Pie from '../components/Pie.astro';
+import { empresa } from '../data/empresa';
+import { IDIOMAS, idiomaActual, rutaEquivalente, textos } from '../i18n/ui';
+
+interface Props {
+  titulo?: string;
+  descripcion?: string;
+}
+const idioma = idiomaActual(Astro.currentLocale);
+const t = textos[idioma];
+const { titulo, descripcion = empresa.descripcion[idioma] } = Astro.props;
+const tituloCompleto = titulo ? `${titulo} · ${empresa.nombreCorto}` : `${empresa.nombre} · ${empresa.eslogan[idioma]}`;
+---
+
+<!doctype html>
+<html lang={idioma === 'es' ? 'es-CO' : 'en'}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{tituloCompleto}</title>
+    <meta name="description" content={descripcion} />
+    <meta name="theme-color" content="#f7f4ee" />
+    <meta name="color-scheme" content="light dark" />
+    <script is:inline>
+      // Aplica el tema antes de pintar para evitar parpadeo: preferencia guardada o la del sistema.
+      (() => {
+        const sistema = matchMedia('(prefers-color-scheme: dark)');
+        const guardado = () => {
+          try {
+            return localStorage.getItem('tema');
+          } catch {
+            return null;
+          }
+        };
+        const aplicar = (tema) => {
+          document.documentElement.dataset.theme = tema;
+          document.querySelector('meta[name=theme-color]')?.setAttribute('content', tema === 'dark' ? '#0b1a20' : '#f7f4ee');
+        };
+        aplicar(guardado() || (sistema.matches ? 'dark' : 'light'));
+        sistema.addEventListener('change', (e) => guardado() || aplicar(e.matches ? 'dark' : 'light'));
+        window.cambiarTema = () => {
+          const nuevo = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+          aplicar(nuevo);
+          try {
+            localStorage.setItem('tema', nuevo);
+          } catch {}
+        };
+      })();
+    </script>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    {Astro.site && <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />}
+    {
+      Astro.site &&
+        IDIOMAS.map((i) => (
+          <link rel="alternate" hreflang={i} href={new URL(rutaEquivalente(Astro.url.pathname, i), Astro.site)} />
+        ))
+    }
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={tituloCompleto} />
+    <meta property="og:description" content={descripcion} />
+    <meta property="og:locale" content={idioma === 'es' ? 'es_CO' : 'en_US'} />
+  </head>
+  <body class="flex min-h-dvh flex-col">
+    <a href="#contenido" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 btn btn-primary">
+      {t.saltar}
+    </a>
+    <Cabecera />
+    <main id="contenido" class="flex-1">
+      <slot />
+    </main>
+    <Pie />
+  </body>
+</html>

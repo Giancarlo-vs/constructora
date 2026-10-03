@@ -1,0 +1,31 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Estratos from './Estratos.astro';
+
+interface Props {
+  imagen?: ImageMetadata;
+  alt: string;
+  semilla: string;
+  sizes?: string;
+  prioridad?: boolean;
+  class?: string;
+}
+const { imagen, alt, semilla, sizes = '(min-width: 768px) 33vw, 100vw', prioridad = false, class: className } = Astro.props;
+---
+
+{
+  imagen ? (
+    <Image
+      src={imagen}
+      alt={alt}
+      widths={[480, 800, 1200, 1600]}
+      sizes={sizes}
+      loading={prioridad ? 'eager' : 'lazy'}
+      fetchpriority={prioridad ? 'high' : 'auto'}
+      class:list={['h-full w-full object-cover', className]}
+    />
+  ) : (
+    <Estratos semilla={semilla} sondeo class:list={['h-full w-full', className]} />
+  )
+}

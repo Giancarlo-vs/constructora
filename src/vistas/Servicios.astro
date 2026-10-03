@@ -1,0 +1,74 @@
+---
+import { getCollection, render } from 'astro:content';
+import { LINEAS } from '../content.config';
+import Layout from '../layouts/Layout.astro';
+import Encabezado from '../components/Encabezado.astro';
+import Icono from '../components/Icono.astro';
+import Parrafos from '../components/Parrafos.astro';
+import LlamadoAccion from '../components/LlamadoAccion.astro';
+import { idiomaActual, NOMBRE_LINEA, servicioEn, textos } from '../i18n/ui';
+
+const idioma = idiomaActual(Astro.currentLocale);
+const t = textos[idioma];
+const servicios = await Promise.all(
+  (await getCollection('servicios'))
+    .sort((a, b) => a.data.orden - b.data.orden)
+    .map(async (s) => ({ s, datos: servicioEn(s, idioma), Contenido: (await render(s)).Content })),
+);
+const grupos = LINEAS.map((linea) => ({
+  linea: NOMBRE_LINEA[linea][idioma],
+  items: servicios.filter(({ s }) => s.data.linea === linea),
+})).filter((g) => g.items.length > 0);
+---
+
+<Layout titulo={t.menu.servicios} descripcion={t.servicios.descripcion}>
+  <Encabezado antetitulo={t.menu.servicios} titulo={t.servicios.titulo} texto={t.servicios.texto}>
+    <nav class="mt-10 flex flex-wrap gap-2" aria-label={t.menu.servicios}>
+      {
+        servicios.map(({ s, datos }) => (
+          <a href={`#${s.id}`} class="rounded-full px-4 py-2 text-sm font-medium ring-1 ring-ink/15 transition-colors hover:bg-ink hover:text-paper">
+            {datos.titulo}
+          </a>
+        ))
+      }
+    </nav>
+  </Encabezado>
+
+  {
+    grupos.map(({ linea, items }) => (
+      <div class="contenedor">
+        <h2 class="eyebrow border-t-2 border-ink pt-4">{linea}</h2>
+        <div class="divide-y divide-ink/10">
+          {items.map(({ s, datos, Contenido }) => (
+            <section id={s.id} class="grid scroll-mt-20 gap-8 py-14 md:grid-cols-2 md:gap-12">
+              <div>
+                <span class="flex size-12 items-center justify-center rounded-xl bg-noche text-ochre">
+                  <Icono nombre={datos.icono} />
+                </span>
+                <h3 class="mt-6 text-3xl font-bold">{datos.titulo}</h3>
+                <div class="prose prose-stone dark:prose-invert mt-4 text-muted">
+                  {datos.descripcion ? <Parrafos texto={datos.descripcion} /> : <Contenido />}
+                </div>
+              </div>
+              {datos.incluye.length > 0 && (
+                <div class="self-start rounded-2xl bg-sand/60 p-7">
+                  <h4 class="eyebrow">{t.servicios.incluye}</h4>
+                  <ul class="mt-4 space-y-3 text-sm">
+                    {datos.incluye.map((item) => (
+                      <li class="flex gap-3">
+                        <span class="mt-1.5 size-1.5 shrink-0 rounded-full bg-naranja" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </section>
+          ))}
+        </div>
+      </div>
+    ))
+  }
+
+  <LlamadoAccion />
+</Layout>

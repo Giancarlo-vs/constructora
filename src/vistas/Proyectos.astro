@@ -1,0 +1,74 @@
+---
+import { getCollection } from 'astro:content';
+import { CATEGORIAS } from '../content.config';
+import Layout from '../layouts/Layout.astro';
+import Encabezado from '../components/Encabezado.astro';
+import TarjetaProyecto from '../components/TarjetaProyecto.astro';
+import LlamadoAccion from '../components/LlamadoAccion.astro';
+import { idiomaActual, NOMBRE_CATEGORIA, textos } from '../i18n/ui';
+
+const idioma = idiomaActual(Astro.currentLocale);
+const t = textos[idioma];
+const proyectos = (await getCollection('proyectos')).sort((a, b) => a.data.orden - b.data.orden);
+// Solo se muestran como filtro las categorías que tienen proyectos.
+const categorias = CATEGORIAS.filter((c) => proyectos.some((p) => p.data.categoria === c));
+
+// Filtro sin JavaScript: radios + :has(). Al marcar un radio se ocultan
+// las tarjetas de otras categorías.
+const css = categorias
+  .map((_, i) => `.catalogo:has(#filtro-${i}:checked) [data-filtro]:not([data-filtro="${i}"]){display:none}`)
+  .join('');
+---
+
+<Layout titulo={t.menu.proyectos} descripcion={t.proyectos.descripcion}>
+  <style is:inline set:html={css} />
+
+  <Encabezado antetitulo={t.menu.proyectos} titulo={t.proyectos.titulo} texto={t.proyectos.texto} />
+
+  <div class="catalogo contenedor pb-8">
+    <fieldset class="flex flex-wrap gap-2">
+      <legend class="sr-only">{t.proyectos.filtrar}</legend>
+      <label class="filtro">
+        <input type="radio" name="filtro" class="sr-only" checked />
+        {t.proyectos.todos} <span class="text-muted">{proyectos.length}</span>
+      </label>
+      {
+        categorias.map((c, i) => (
+          <label class="filtro">
+            <input type="radio" name="filtro" id={`filtro-${i}`} class="sr-only" />
+            {NOMBRE_CATEGORIA[c][idioma]} <span class="text-muted">{proyectos.filter((p) => p.data.categoria === c).length}</span>
+          </label>
+        ))
+      }
+    </fieldset>
+
+    <ul class="mt-12 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        proyectos.map((p) => (
+          <li data-filtro={categorias.indexOf(p.data.categoria)}>
+            <TarjetaProyecto proyecto={p} />
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+
+  <LlamadoAccion />
+</Layout>
+
+<style>
+  @reference "../styles/global.css";
+
+  .filtro {
+    @apply flex cursor-pointer items-center gap-2 rounded-full px-4 py-2 text-sm font-medium ring-1 ring-ink/15 transition-colors select-none hover:bg-sand;
+  }
+  .filtro:has(:checked) {
+    @apply bg-ink text-paper ring-ink;
+  }
+  .filtro:has(:checked) span {
+    @apply text-paper/60;
+  }
+  .filtro:has(:focus-visible) {
+    @apply outline-2 outline-offset-2 outline-clay;
+  }
+</style>
