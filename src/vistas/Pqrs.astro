@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import Encabezado from '../components/Encabezado.astro';
 import AvisoPrivacidad from '../components/AvisoPrivacidad.astro';
-import { empresa, telefonoHref, whatsappUrl } from '../data/empresa';
+import { empresa } from '../data/empresa';
 import { conexion } from '../data/encuesta';
 import { formatoPqrs, serviciosPqrs, tiposPqrs } from '../data/pqrs';
 import { idiomaActual, textos } from '../i18n/ui';
@@ -13,10 +13,15 @@ const p = t.pqrs;
 
 // Clave de pruebas de Cloudflare para el servidor de desarrollo.
 const claveTurnstile = import.meta.env.DEV ? '1x00000000000000000000AA' : conexion.turnstile;
-const disponible = import.meta.env.DEV || Boolean(conexion.endpoint && conexion.turnstile);
+// Sin conexión con Google, la solicitud se envía por WhatsApp.
+const conectado = Boolean(conexion.endpoint && conexion.turnstile);
 
 const mensajes = { faltaOtro: p.faltaOtro, esperar: p.esperar, error: p.error, enviando: p.enviando };
 const documento = { formato: formatoPqrs.codigo, version: formatoPqrs.version, idioma };
+// El mensaje de WhatsApp va siempre en español: lo registra la empresa.
+const es = textos.es.pqrs;
+const etiquetas = { nombre: es.nombre, documento: es.documento, telefono: es.telefono, correo: es.correo, direccion: es.direccion, municipio: es.municipio, proyecto: es.proyecto };
+const autorizacion = es.autoriza;
 ---
 
 <Layout titulo={t.menu.pqrs} descripcion={p.descripcion}>
@@ -28,183 +33,205 @@ const documento = { formato: formatoPqrs.codigo, version: formatoPqrs.version, i
 
   <section class="contenedor pb-20">
     <div class="max-w-3xl">
-      {
-        !disponible ? (
-          <div class="rounded-2xl bg-sand/60 p-6">
-            <p>{p.noDisponible}</p>
-            <ul class="mt-3 space-y-1 font-medium">
-              <li><a class="hover:text-clay" href={whatsappUrl(t.whatsappMensaje)} target="_blank" rel="noopener">WhatsApp: {empresa.telefonos[1].numero}</a></li>
-              <li><a class="hover:text-clay" href={telefonoHref(empresa.telefonos[0].numero)}>{empresa.telefonos[0].numero}</a></li>
-              <li><a class="hover:text-clay break-all" href={`mailto:${empresa.email}`}>{empresa.email}</a></li>
-            </ul>
+      <form id="pqrs" class="space-y-10">
+        <noscript>
+          <p class="rounded-2xl bg-sand/60 p-6">{p.noDisponible} {empresa.email}</p>
+        </noscript>
+
+        <div>
+          <h2 class="text-xl font-semibold">{p.seccion1}</h2>
+          <div class="mt-4 grid gap-5 rounded-3xl bg-sand/60 p-6 sm:grid-cols-2 sm:p-8">
+            <label class="campo">
+              <span>{p.nombre}</span>
+              <input name="nombre" required maxlength="150" autocomplete="organization" />
+            </label>
+            <label class="campo">
+              <span>{p.documento}</span>
+              <input name="documento" required maxlength="30" />
+            </label>
+            <label class="campo">
+              <span>{p.telefono}</span>
+              <input name="telefono" type="tel" required maxlength="40" autocomplete="tel" />
+            </label>
+            <label class="campo">
+              <span>{p.correo} <em>{p.opcional}</em></span>
+              <input name="correo" type="email" maxlength="150" autocomplete="email" />
+              {conectado && <small class="text-xs font-normal text-muted">{p.ayudaCorreo}</small>}
+            </label>
+            <label class="campo">
+              <span>{p.direccion} <em>{p.opcional}</em></span>
+              <input name="direccion" maxlength="200" autocomplete="street-address" />
+            </label>
+            <label class="campo">
+              <span>{p.municipio} <em>{p.opcional}</em></span>
+              <input name="municipio" maxlength="100" autocomplete="address-level2" />
+            </label>
+            <label class="campo sm:col-span-2">
+              <span>{p.proyecto} <em>{p.opcional}</em></span>
+              <input name="proyecto" maxlength="200" />
+            </label>
           </div>
-        ) : (
-          <>
-            <form id="pqrs" class="space-y-10">
-              <noscript>
-                <p class="rounded-2xl bg-sand/60 p-6">{p.noDisponible} {empresa.email}</p>
-              </noscript>
+        </div>
 
-              <div>
-                <h2 class="text-xl font-semibold">{p.seccion1}</h2>
-                <div class="mt-4 grid gap-5 rounded-3xl bg-sand/60 p-6 sm:grid-cols-2 sm:p-8">
-                  <label class="campo">
-                    <span>{p.nombre}</span>
-                    <input name="nombre" required maxlength="150" autocomplete="organization" />
-                  </label>
-                  <label class="campo">
-                    <span>{p.documento}</span>
-                    <input name="documento" required maxlength="30" />
-                  </label>
-                  <label class="campo">
-                    <span>{p.telefono}</span>
-                    <input name="telefono" type="tel" required maxlength="40" autocomplete="tel" />
-                  </label>
-                  <label class="campo">
-                    <span>{p.correo} <em>{p.opcional}</em></span>
-                    <input name="correo" type="email" maxlength="150" autocomplete="email" />
-                    <small class="text-xs font-normal text-muted">{p.ayudaCorreo}</small>
-                  </label>
-                  <label class="campo">
-                    <span>{p.direccion} <em>{p.opcional}</em></span>
-                    <input name="direccion" maxlength="200" autocomplete="street-address" />
-                  </label>
-                  <label class="campo">
-                    <span>{p.municipio} <em>{p.opcional}</em></span>
-                    <input name="municipio" maxlength="100" autocomplete="address-level2" />
-                  </label>
-                  <label class="campo sm:col-span-2">
-                    <span>{p.proyecto} <em>{p.opcional}</em></span>
-                    <input name="proyecto" maxlength="200" />
-                  </label>
-                </div>
-              </div>
-
-              <fieldset>
-                <legend class="text-xl font-semibold">{p.seccion2}</legend>
-                <div class="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
-                  {
-                    tiposPqrs.map((tipo) => (
-                      <label class="tipo">
-                        <input type="radio" class="sr-only" name="tipo" value={tipo.valor} required />
-                        <span class="font-semibold">{tipo.texto[idioma]}</span>
-                        <small>{tipo.ayuda[idioma]}</small>
-                      </label>
-                    ))
-                  }
-                </div>
-              </fieldset>
-
-              <fieldset>
-                <legend class="text-xl font-semibold">{p.seccion3}</legend>
-                <div class="mt-4 grid gap-3 sm:grid-cols-2">
-                  {
-                    serviciosPqrs.map((s) => (
-                      <label class="flex items-center gap-3 text-sm">
-                        <input type="radio" name="servicio" value={s.valor} required class="size-5 shrink-0 accent-clay" />
-                        <span>{s.texto[idioma]}</span>
-                      </label>
-                    ))
-                  }
-                </div>
-                <label class="campo otro mt-4 max-w-md">
-                  <span>{p.otroCual}</span>
-                  <input name="servicioOtro" maxlength="100" />
+        <fieldset>
+          <legend class="text-xl font-semibold">{p.seccion2}</legend>
+          <div class="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+            {
+              tiposPqrs.map((tipo) => (
+                <label class="tipo">
+                  <input type="radio" class="sr-only" name="tipo" value={tipo.valor} required />
+                  <span class="font-semibold">{tipo.texto[idioma]}</span>
+                  <small>{tipo.ayuda[idioma]}</small>
                 </label>
-              </fieldset>
+              ))
+            }
+          </div>
+        </fieldset>
 
-              <label class="campo">
-                <span class="font-display text-xl font-semibold">{p.seccion4}</span>
-                <textarea name="descripcion" rows="6" required maxlength="4000"></textarea>
-              </label>
-
-              <div class="space-y-4 rounded-3xl bg-sand/60 p-6 sm:p-8">
-                <label class="campo">
-                  <span>{p.firma}</span>
-                  <input name="firma" required maxlength="150" autocomplete="name" />
+        <fieldset>
+          <legend class="text-xl font-semibold">{p.seccion3}</legend>
+          <div class="mt-4 grid gap-3 sm:grid-cols-2">
+            {
+              serviciosPqrs.map((s) => (
+                <label class="flex items-center gap-3 text-sm">
+                  <input type="radio" name="servicio" value={s.valor} required class="size-5 shrink-0 accent-clay" />
+                  <span>{s.texto[idioma]}</span>
                 </label>
-                <label class="flex items-start gap-3 text-sm">
-                  <input type="checkbox" name="autoriza" required class="mt-0.5 size-5 shrink-0 accent-clay" />
-                  <span>{p.autoriza}</span>
-                </label>
-                <AvisoPrivacidad finalidad={p.finalidad} />
-              </div>
+              ))
+            }
+          </div>
+          <label class="campo otro mt-4 max-w-md">
+            <span>{p.otroCual}</span>
+            <input name="servicioOtro" maxlength="100" />
+          </label>
+        </fieldset>
 
-              <!-- Trampa para robots: las personas no ven este campo. -->
-              <input type="text" name="sitio" tabindex="-1" autocomplete="off" aria-hidden="true" class="absolute -left-[9999px]" />
+        <label class="campo">
+          <span class="font-display text-xl font-semibold">{p.seccion4}</span>
+          <textarea name="descripcion" rows="6" required maxlength={conectado ? 4000 : 1500}></textarea>
+        </label>
 
-              <div class="cf-turnstile" data-sitekey={claveTurnstile} data-language={idioma}></div>
+        <div class="space-y-4 rounded-3xl bg-sand/60 p-6 sm:p-8">
+          <label class="campo">
+            <span>{p.firma}</span>
+            <input name="firma" required maxlength="150" autocomplete="name" />
+          </label>
+          <label class="flex items-start gap-3 text-sm">
+            <input type="checkbox" name="autoriza" required class="mt-0.5 size-5 shrink-0 accent-clay" />
+            <span>{p.autoriza}</span>
+          </label>
+          <AvisoPrivacidad finalidad={p.finalidad} />
+        </div>
 
-              <div>
-                <button type="submit" class="btn btn-primary">{p.enviar}</button>
-                <p id="estado" role="status" class="mt-3 text-sm font-medium text-clay"></p>
-              </div>
-            </form>
+        <!-- Trampa para robots: las personas no ven este campo. -->
+        <input type="text" name="sitio" tabindex="-1" autocomplete="off" aria-hidden="true" class="absolute -left-[9999px]" />
 
-            <div id="gracias" hidden class="rounded-3xl bg-sand/60 p-8 text-center sm:p-12">
+        {conectado && <div class="cf-turnstile" data-sitekey={claveTurnstile} data-language={idioma}></div>}
+
+        <div>
+          <button type="submit" class="btn btn-primary">{p.enviar}</button>
+          {!conectado && <p class="mt-3 text-xs text-muted">{p.avisoWhatsapp}</p>}
+          <p id="estado" role="status" class="mt-3 text-sm font-medium text-clay"></p>
+        </div>
+      </form>
+
+      <div id="gracias" hidden class="rounded-3xl bg-sand/60 p-8 text-center sm:p-12">
+        {
+          conectado ? (
+            <>
               <h2 class="text-3xl font-bold text-clay">{p.graciasTitulo}</h2>
               <p class="mt-5 text-muted">{p.radicado}</p>
-              <p id="radicado" class="mt-1 font-display text-3xl font-bold"></p>
+              <p id="radicado" class="mt-1 font-display text-3xl font-bold" />
               <p class="mt-5 text-muted">{p.graciasTexto}</p>
-            </div>
-          </>
-        )
-      }
+            </>
+          ) : (
+            <>
+              <h2 class="text-3xl font-bold text-clay">{p.pasoTitulo}</h2>
+              <p class="mt-5 text-muted">{p.pasoTexto}</p>
+              <a id="reabrir" target="_blank" rel="noopener" class="btn btn-primary mt-6">{p.reabrir}</a>
+            </>
+          )
+        }
+      </div>
 
       <p class="mt-12 text-center text-xs italic text-muted">{p.pie}</p>
     </div>
   </section>
 </Layout>
 
-{
-  disponible && (
-    <>
-      <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
-      <script is:inline define:vars={{ endpoint: conexion.endpoint, documento, mensajes }}>
-        const form = document.getElementById('pqrs');
-        const estado = document.getElementById('estado');
-        const boton = form.querySelector('button[type=submit]');
+{conectado && <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />}
+<script is:inline define:vars={{ endpoint: conectado ? conexion.endpoint : '', whatsapp: empresa.whatsapp, documento, mensajes, etiquetas, autorizacion }}>
+  const form = document.getElementById('pqrs');
+  const estado = document.getElementById('estado');
+  const boton = form.querySelector('button[type=submit]');
 
-        form.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const datos = Object.fromEntries(new FormData(form));
-          if (datos.servicio === 'Otro' && !datos.servicioOtro.trim()) {
-            estado.textContent = mensajes.faltaOtro;
-            form.elements.servicioOtro.focus();
-            return;
-          }
-          const turnstile = datos['cf-turnstile-response'];
-          if (!turnstile) {
-            estado.textContent = mensajes.esperar;
-            return;
-          }
-          delete datos['cf-turnstile-response'];
+  const mostrarFin = () => {
+    form.hidden = true;
+    document.getElementById('gracias').hidden = false;
+    scrollTo(0, 0);
+  };
 
-          boton.disabled = true;
-          estado.textContent = mensajes.enviando;
-          try {
-            // text/plain evita la consulta previa CORS, que Apps Script no responde.
-            const respuesta = await fetch(endpoint, {
-              method: 'POST',
-              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-              body: JSON.stringify({ ...datos, ...documento, turnstile, registro: 'pqrs', autoriza: datos.autoriza === 'on' }),
-            });
-            const resultado = await respuesta.json();
-            if (!resultado.ok) throw new Error(resultado.error);
-            document.getElementById('radicado').textContent = resultado.radicado;
-            form.hidden = true;
-            document.getElementById('gracias').hidden = false;
-            scrollTo(0, 0);
-          } catch {
-            estado.textContent = mensajes.error;
-            boton.disabled = false;
-            window.turnstile?.reset();
-          }
-        });
-      </script>
-    </>
-  )
-}
+  const enviarPorWhatsApp = (d) => {
+    const servicio = d.servicio === 'Otro' ? `Otro: ${d.servicioOtro.trim()}` : d.servicio;
+    const lineas = [
+      `*PQRS (${documento.formato}, versión ${documento.version})*`,
+      `*Tipo:* ${d.tipo}`,
+      `*Servicio:* ${servicio}`,
+      '',
+      ...Object.entries(etiquetas)
+        .filter(([campo]) => d[campo])
+        .map(([campo, etiqueta]) => `${etiqueta}: ${d[campo]}`),
+      '',
+      `*Descripción:* ${d.descripcion}`,
+      '',
+      `Solicitante: ${d.firma}`,
+      `${autorizacion} Sí`,
+    ];
+    const url = `https://wa.me/${whatsapp}?text=${encodeURIComponent(lineas.join('\n'))}`;
+    document.getElementById('reabrir').href = url;
+    window.open(url, '_blank', 'noopener');
+    mostrarFin();
+  };
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const datos = Object.fromEntries(new FormData(form));
+    if (datos.servicio === 'Otro' && !datos.servicioOtro.trim()) {
+      estado.textContent = mensajes.faltaOtro;
+      form.elements.servicioOtro.focus();
+      return;
+    }
+    if (!endpoint) {
+      enviarPorWhatsApp(datos);
+      return;
+    }
+    const turnstile = datos['cf-turnstile-response'];
+    if (!turnstile) {
+      estado.textContent = mensajes.esperar;
+      return;
+    }
+    delete datos['cf-turnstile-response'];
+
+    boton.disabled = true;
+    estado.textContent = mensajes.enviando;
+    try {
+      // text/plain evita la consulta previa CORS, que Apps Script no responde.
+      const respuesta = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ ...datos, ...documento, turnstile, registro: 'pqrs', autoriza: datos.autoriza === 'on' }),
+      });
+      const resultado = await respuesta.json();
+      if (!resultado.ok) throw new Error(resultado.error);
+      document.getElementById('radicado').textContent = resultado.radicado;
+      mostrarFin();
+    } catch {
+      estado.textContent = mensajes.error;
+      boton.disabled = false;
+      window.turnstile?.reset();
+    }
+  });
+</script>
 
 <style>
   @reference "../styles/global.css";

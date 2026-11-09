@@ -8,7 +8,8 @@ import { atencion, conexion, escala, formato, servicios } from '../data/encuesta
 
 // Clave de pruebas de Cloudflare para el servidor de desarrollo.
 const claveTurnstile = import.meta.env.DEV ? '1x00000000000000000000AA' : conexion.turnstile;
-const disponible = import.meta.env.DEV || Boolean(conexion.endpoint && conexion.turnstile);
+// Sin conexión con Google, las respuestas se envían por WhatsApp.
+const conectado = Boolean(conexion.endpoint && conexion.turnstile);
 const leyenda = escala.filter((e) => e.valor !== 'N/A');
 ---
 
@@ -21,134 +22,141 @@ const leyenda = escala.filter((e) => e.valor !== 'N/A');
       Código: {formato.codigo} · Versión: {formato.version} · Fecha de emisión: {formato.emision} · Proceso: {formato.proceso}
     </p>
 
-    {
-      !disponible ? (
-        <p class="mt-10 rounded-2xl bg-sand/60 p-6">La encuesta no está disponible en este momento. Por favor, inténtelo más tarde.</p>
-      ) : (
-        <form id="encuesta" class="mt-10 space-y-10">
-          <noscript>
-            <p class="rounded-2xl bg-sand/60 p-6">Para responder la encuesta necesita tener JavaScript activado.</p>
-          </noscript>
+    <form id="encuesta" class="mt-10 space-y-10">
+      <noscript>
+        <p class="rounded-2xl bg-sand/60 p-6">Para responder la encuesta necesita tener JavaScript activado.</p>
+      </noscript>
 
-          <div class="grid gap-5 rounded-3xl bg-sand/60 p-6 sm:grid-cols-2 sm:p-8">
-            <label class="campo">
-              <span>Cliente</span>
-              <input name="cliente" required maxlength="150" autocomplete="organization" />
-            </label>
-            <label class="campo">
-              <span>Fecha</span>
-              <input name="fecha" type="date" required />
-            </label>
-            <label class="campo">
-              <span>Proyecto</span>
-              <input name="proyecto" required maxlength="200" />
-            </label>
-            <label class="campo">
-              <span>
-                Teléfono / Correo <em>(opcional)</em>
-              </span>
-              <input name="contacto" maxlength="150" />
-            </label>
-          </div>
+      <div class="grid gap-5 rounded-3xl bg-sand/60 p-6 sm:grid-cols-2 sm:p-8">
+        <label class="campo">
+          <span>Cliente</span>
+          <input name="cliente" required maxlength="150" autocomplete="organization" />
+        </label>
+        <label class="campo">
+          <span>Fecha</span>
+          <input name="fecha" type="date" required />
+        </label>
+        <label class="campo">
+          <span>Proyecto</span>
+          <input name="proyecto" required maxlength="200" />
+        </label>
+        <label class="campo">
+          <span>
+            Teléfono / Correo <em>(opcional)</em>
+          </span>
+          <input name="contacto" maxlength="150" />
+        </label>
+      </div>
 
-          <p class="text-sm">
-            <strong class="font-semibold">Marque una opción:</strong>
-            {leyenda.map((e, i) => <span class="text-muted">{i > 0 && ' · '}{e.valor} = {e.texto}</span>)}
-          </p>
+      <p class="text-sm">
+        <strong class="font-semibold">Marque una opción:</strong>
+        {leyenda.map((e, i) => <span class="text-muted">{i > 0 && ' · '}{e.valor} = {e.texto}</span>)}
+      </p>
 
-          <section>
-            <h2 class="text-xl font-semibold">1. ¿Cómo califica nuestros servicios?</h2>
-            <p class="mt-1 text-sm text-muted">Califique solo los que recibió. Deje “N/A” en los demás.</p>
-            <div class="mt-4 divide-y divide-ink/10">
-              {
-                servicios.map((p) => (
-                  <fieldset class="py-4">
-                    <legend class="float-left mb-3 w-full font-medium">{p.texto}</legend>
-                    <div class="escala clear-both">
-                      {escala.map((e) => (
-                        <label>
-                          <input type="radio" class="sr-only" name={p.id} value={e.valor} checked={e.valor === 'N/A'} aria-label={e.texto} />
-                          <span aria-hidden="true">{e.valor}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </fieldset>
-                ))
-              }
-            </div>
-          </section>
-
-          <section>
-            <h2 class="text-xl font-semibold">2. ¿Cómo califica nuestra atención?</h2>
-            <div class="mt-4 divide-y divide-ink/10">
-              {
-                atencion.map((p) => (
-                  <fieldset class="py-4">
-                    <legend class="float-left mb-3 w-full font-medium">{p.texto}</legend>
-                    <div class="escala clear-both">
-                      {escala.map((e) => (
-                        <label>
-                          <input type="radio" class="sr-only" name={p.id} value={e.valor} required aria-label={e.texto} />
-                          <span aria-hidden="true">{e.valor}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </fieldset>
-                ))
-              }
-            </div>
-          </section>
-
-          <fieldset>
-            <legend class="text-xl font-semibold">3. ¿Nos recomendaría con otras personas o empresas?</legend>
-            <div class="escala mt-4 max-w-48 grid-cols-2!">
-              {
-                ['Sí', 'No'].map((v) => (
-                  <label>
-                    <input type="radio" class="sr-only" name="recomendaria" value={v} required />
-                    <span>{v}</span>
-                  </label>
-                ))
-              }
-            </div>
-          </fieldset>
-
-          <label class="campo">
-            <span class="font-display text-xl font-semibold">4. ¿Qué podemos mejorar? <em class="text-sm">(opcional)</em></span>
-            <textarea name="mejorar" rows="3" maxlength="2000"></textarea>
-          </label>
-
-          <div class="space-y-4 rounded-3xl bg-sand/60 p-6 sm:p-8">
-            <label class="campo">
-              <span>Nombre de quien responde</span>
-              <input name="nombre" required maxlength="150" autocomplete="name" />
-            </label>
-
-            <label class="flex items-start gap-3 text-sm">
-              <input type="checkbox" name="autoriza" required class="mt-0.5 size-5 shrink-0 accent-clay" />
-              <span>Autorizo el tratamiento de mis datos personales conforme a la Ley 1581 de 2012.</span>
-            </label>
-
-            <AvisoPrivacidad finalidad="Medir la satisfacción de nuestros clientes, atender sus comentarios y conservar los registros del Sistema de Gestión de la Calidad." />
-          </div>
-
-          <!-- Trampa para robots: las personas no ven este campo. -->
-          <input type="text" name="sitio" tabindex="-1" autocomplete="off" aria-hidden="true" class="absolute -left-[9999px]" />
-
-          <div class="cf-turnstile" data-sitekey={claveTurnstile} data-language="es"></div>
-
-          <div>
-            <button type="submit" class="btn btn-primary">Enviar encuesta</button>
-            <p id="estado" role="status" class="mt-3 text-sm font-medium text-clay"></p>
-          </div>
-        </form>
-
-        <div id="gracias" hidden class="mt-10 rounded-3xl bg-sand/60 p-8 text-center sm:p-12">
-          <h2 class="text-3xl font-bold text-clay">¡Gracias por confiar en {empresa.nombre}!</h2>
-          <p class="mt-3 text-muted">Recibimos su encuesta. Ya puede cerrar esta página.</p>
+      <section>
+        <h2 class="text-xl font-semibold">1. ¿Cómo califica nuestros servicios?</h2>
+        <p class="mt-1 text-sm text-muted">Califique solo los que recibió. Deje “N/A” en los demás.</p>
+        <div class="mt-4 divide-y divide-ink/10">
+          {
+            servicios.map((p) => (
+              <fieldset class="py-4">
+                <legend class="float-left mb-3 w-full font-medium">{p.texto}</legend>
+                <div class="escala clear-both">
+                  {escala.map((e) => (
+                    <label>
+                      <input type="radio" class="sr-only" name={p.id} value={e.valor} checked={e.valor === 'N/A'} aria-label={e.texto} />
+                      <span aria-hidden="true">{e.valor}</span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            ))
+          }
         </div>
-      )
-    }
+      </section>
+
+      <section>
+        <h2 class="text-xl font-semibold">2. ¿Cómo califica nuestra atención?</h2>
+        <div class="mt-4 divide-y divide-ink/10">
+          {
+            atencion.map((p) => (
+              <fieldset class="py-4">
+                <legend class="float-left mb-3 w-full font-medium">{p.texto}</legend>
+                <div class="escala clear-both">
+                  {escala.map((e) => (
+                    <label>
+                      <input type="radio" class="sr-only" name={p.id} value={e.valor} required aria-label={e.texto} />
+                      <span aria-hidden="true">{e.valor}</span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            ))
+          }
+        </div>
+      </section>
+
+      <fieldset>
+        <legend class="text-xl font-semibold">3. ¿Nos recomendaría con otras personas o empresas?</legend>
+        <div class="escala mt-4 max-w-48 grid-cols-2!">
+          {
+            ['Sí', 'No'].map((v) => (
+              <label>
+                <input type="radio" class="sr-only" name="recomendaria" value={v} required />
+                <span>{v}</span>
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+
+      <label class="campo">
+        <span class="font-display text-xl font-semibold">4. ¿Qué podemos mejorar? <em class="text-sm">(opcional)</em></span>
+        <textarea name="mejorar" rows="3" maxlength={conectado ? 2000 : 1500}></textarea>
+      </label>
+
+      <div class="space-y-4 rounded-3xl bg-sand/60 p-6 sm:p-8">
+        <label class="campo">
+          <span>Nombre de quien responde</span>
+          <input name="nombre" required maxlength="150" autocomplete="name" />
+        </label>
+
+        <label class="flex items-start gap-3 text-sm">
+          <input type="checkbox" name="autoriza" required class="mt-0.5 size-5 shrink-0 accent-clay" />
+          <span>Autorizo el tratamiento de mis datos personales conforme a la Ley 1581 de 2012.</span>
+        </label>
+
+        <AvisoPrivacidad finalidad="Medir la satisfacción de nuestros clientes, atender sus comentarios y conservar los registros del Sistema de Gestión de la Calidad." />
+      </div>
+
+      <!-- Trampa para robots: las personas no ven este campo. -->
+      <input type="text" name="sitio" tabindex="-1" autocomplete="off" aria-hidden="true" class="absolute -left-[9999px]" />
+
+      {conectado && <div class="cf-turnstile" data-sitekey={claveTurnstile} data-language="es"></div>}
+
+      <div>
+        <button type="submit" class="btn btn-primary">Enviar encuesta</button>
+        {!conectado && <p class="mt-3 text-xs text-muted">Se abrirá WhatsApp con sus respuestas listas para enviar.</p>}
+        <p id="estado" role="status" class="mt-3 text-sm font-medium text-clay"></p>
+      </div>
+    </form>
+
+    <div id="gracias" hidden class="mt-10 rounded-3xl bg-sand/60 p-8 text-center sm:p-12">
+      {
+        conectado ? (
+          <>
+            <h2 class="text-3xl font-bold text-clay">¡Gracias por confiar en {empresa.nombre}!</h2>
+            <p class="mt-3 text-muted">Recibimos su encuesta. Ya puede cerrar esta página.</p>
+          </>
+        ) : (
+          <>
+            <h2 class="text-3xl font-bold text-clay">Falta un último paso</h2>
+            <p class="mt-3 text-muted">Se abrió WhatsApp con sus respuestas. Pulse <strong>Enviar</strong> allí para que las recibamos.</p>
+            <a id="reabrir" target="_blank" rel="noopener" class="btn btn-primary mt-6">Abrir WhatsApp de nuevo</a>
+          </>
+        )
+      }
+    </div>
 
     <p class="mt-12 text-center text-xs italic text-muted">
       Documento propiedad de INGESUELOS. Su contenido es confidencial y está protegido por derechos de propiedad intelectual; se prohíbe su reproducción, copia
@@ -157,58 +165,87 @@ const leyenda = escala.filter((e) => e.valor !== 'N/A');
   </section>
 </Layout>
 
-{
-  disponible && (
-    <>
-      <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
-      <script is:inline define:vars={{ endpoint: conexion.endpoint, formato, idsServicios: servicios.map((s) => s.id) }}>
-        const form = document.getElementById('encuesta');
-        const estado = document.getElementById('estado');
-        const boton = form.querySelector('button[type=submit]');
+{conectado && <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />}
+<script is:inline define:vars={{ endpoint: conectado ? conexion.endpoint : '', whatsapp: empresa.whatsapp, formato, servicios, atencion }}>
+  const form = document.getElementById('encuesta');
+  const estado = document.getElementById('estado');
+  const boton = form.querySelector('button[type=submit]');
 
-        // El enlace que se envía por WhatsApp puede traer cliente y proyecto.
-        const parametros = new URLSearchParams(location.search);
-        for (const campo of ['cliente', 'proyecto']) form.elements[campo].value = parametros.get(campo) ?? '';
-        form.elements.fecha.value = new Date().toLocaleDateString('en-CA');
+  // El enlace que se envía por WhatsApp puede traer cliente y proyecto.
+  const parametros = new URLSearchParams(location.search);
+  for (const campo of ['cliente', 'proyecto']) form.elements[campo].value = parametros.get(campo) ?? '';
+  form.elements.fecha.value = new Date().toLocaleDateString('en-CA');
 
-        form.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const datos = Object.fromEntries(new FormData(form));
-          if (idsServicios.every((s) => datos[s] === 'N/A')) {
-            estado.textContent = 'Califique al menos uno de los servicios que recibió.';
-            return;
-          }
-          const turnstile = datos['cf-turnstile-response'];
-          if (!turnstile) {
-            estado.textContent = 'Espere un momento a que termine la verificación de seguridad.';
-            return;
-          }
-          delete datos['cf-turnstile-response'];
+  const mostrarFin = () => {
+    form.hidden = true;
+    document.getElementById('gracias').hidden = false;
+    scrollTo(0, 0);
+  };
 
-          boton.disabled = true;
-          estado.textContent = 'Enviando…';
-          try {
-            // text/plain evita la consulta previa CORS, que Apps Script no responde.
-            const respuesta = await fetch(endpoint, {
-              method: 'POST',
-              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-              body: JSON.stringify({ ...datos, turnstile, autoriza: datos.autoriza === 'on', formato: formato.codigo, version: formato.version }),
-            });
-            const resultado = await respuesta.json();
-            if (!resultado.ok) throw new Error(resultado.error);
-            form.hidden = true;
-            document.getElementById('gracias').hidden = false;
-            scrollTo(0, 0);
-          } catch {
-            estado.textContent = 'No pudimos enviar la encuesta. Revise su conexión e inténtelo de nuevo.';
-            boton.disabled = false;
-            window.turnstile?.reset();
-          }
-        });
-      </script>
-    </>
-  )
-}
+  const enviarPorWhatsApp = (d) => {
+    const calificaciones = (lista) => lista.filter((p) => d[p.id] !== 'N/A').map((p) => `- ${p.texto}: ${d[p.id]}`);
+    const lineas = [
+      `*Encuesta de satisfacción (${formato.codigo}, versión ${formato.version})*`,
+      `Cliente: ${d.cliente}`,
+      `Proyecto: ${d.proyecto}`,
+      `Fecha: ${d.fecha}`,
+      d.contacto ? `Teléfono / Correo: ${d.contacto}` : null,
+      '',
+      '*1. Servicios*',
+      ...calificaciones(servicios),
+      '',
+      '*2. Atención*',
+      ...calificaciones(atencion),
+      '',
+      `*3. ¿Nos recomendaría?* ${d.recomendaria}`,
+      d.mejorar ? `*4. ¿Qué podemos mejorar?* ${d.mejorar}` : null,
+      '',
+      `Nombre: ${d.nombre}`,
+      'Autorizo el tratamiento de mis datos personales conforme a la Ley 1581 de 2012: Sí',
+    ].filter((l) => l !== null);
+    const url = `https://wa.me/${whatsapp}?text=${encodeURIComponent(lineas.join('\n'))}`;
+    document.getElementById('reabrir').href = url;
+    window.open(url, '_blank', 'noopener');
+    mostrarFin();
+  };
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const datos = Object.fromEntries(new FormData(form));
+    if (servicios.every((s) => datos[s.id] === 'N/A')) {
+      estado.textContent = 'Califique al menos uno de los servicios que recibió.';
+      return;
+    }
+    if (!endpoint) {
+      enviarPorWhatsApp(datos);
+      return;
+    }
+    const turnstile = datos['cf-turnstile-response'];
+    if (!turnstile) {
+      estado.textContent = 'Espere un momento a que termine la verificación de seguridad.';
+      return;
+    }
+    delete datos['cf-turnstile-response'];
+
+    boton.disabled = true;
+    estado.textContent = 'Enviando…';
+    try {
+      // text/plain evita la consulta previa CORS, que Apps Script no responde.
+      const respuesta = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ ...datos, turnstile, autoriza: datos.autoriza === 'on', formato: formato.codigo, version: formato.version }),
+      });
+      const resultado = await respuesta.json();
+      if (!resultado.ok) throw new Error(resultado.error);
+      mostrarFin();
+    } catch {
+      estado.textContent = 'No pudimos enviar la encuesta. Revise su conexión e inténtelo de nuevo.';
+      boton.disabled = false;
+      window.turnstile?.reset();
+    }
+  });
+</script>
 
 <style>
   @reference "../styles/global.css";
