@@ -9,6 +9,12 @@ orden: 2
 alcance:
   - Andenes y senderos peatonales
   - Zonas verdes y espacio público
+portada: ./fotos/urbanismo-andenes.jpg
+galeria:
+  - ./fotos/urbanismo-parque.jpg
+  - ./fotos/urbanismo-avenida.jpg
+  - ./fotos/urbanismo-cerramiento.jpg
+  - ./fotos/urbanismo-contrato-apartado.jpg
 en:
   titulo: "Labor contract – Municipality of Apartadó"
   resumen: "Urban and public-space works for the municipality of Apartadó."

@@ -5,15 +5,17 @@ import '../styles/global.css';
 import Cabecera from '../components/Cabecera.astro';
 import Pie from '../components/Pie.astro';
 import { empresa } from '../data/empresa';
-import { IDIOMAS, idiomaActual, rutaEquivalente, textos } from '../i18n/ui';
+import { IDIOMAS, idiomaActual, rutaEquivalente, rutaLimpia, textos } from '../i18n/ui';
 
 interface Props {
   titulo?: string;
   descripcion?: string;
+  // Página interna: solo en español y fuera de los buscadores.
+  interna?: boolean;
 }
 const idioma = idiomaActual(Astro.currentLocale);
 const t = textos[idioma];
-const { titulo, descripcion = empresa.descripcion[idioma] } = Astro.props;
+const { titulo, descripcion = empresa.descripcion[idioma], interna = false } = Astro.props;
 const tituloCompleto = titulo ? `${titulo} · ${empresa.nombreCorto}` : `${empresa.nombre} · ${empresa.eslogan[idioma]}`;
 ---
 
@@ -53,9 +55,11 @@ const tituloCompleto = titulo ? `${titulo} · ${empresa.nombreCorto}` : `${empre
       })();
     </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    {Astro.site && <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />}
+    {interna && <meta name="robots" content="noindex" />}
+    {Astro.site && !interna && <link rel="canonical" href={new URL(rutaLimpia(Astro.url.pathname), Astro.site)} />}
     {
       Astro.site &&
+        !interna &&
         IDIOMAS.map((i) => (
           <link rel="alternate" hreflang={i} href={new URL(rutaEquivalente(Astro.url.pathname, i), Astro.site)} />
         ))
@@ -69,7 +73,7 @@ const tituloCompleto = titulo ? `${titulo} · ${empresa.nombreCorto}` : `${empre
     <a href="#contenido" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 btn btn-primary">
       {t.saltar}
     </a>
-    <Cabecera />
+    <Cabecera sinIdioma={interna} />
     <main id="contenido" class="flex-1">
       <slot />
     </main>

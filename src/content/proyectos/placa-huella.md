@@ -3,6 +3,8 @@ titulo: Placa huella
 resumen: Construcción de vía rural en placa huella.
 categoria: Vías
 orden: 6
+portadaReducida: true
+portada: ./fotos/placa-huella.jpg
 en:
   titulo: "Concrete wheel-track road"
   resumen: "Construction of a rural road using concrete wheel tracks (placa huella)."

@@ -6,6 +6,10 @@ orden: 12
 alcance:
   - Redes de acueducto
   - Redes de alcantarillado
+portadaReducida: true
+portada: ./fotos/red-alcantarillado.jpg
+galeria:
+  - ./fotos/red-acueducto.jpg
 en:
   titulo: "Water supply and sewer networks"
   resumen: "Installation of water supply and sewer pipelines."

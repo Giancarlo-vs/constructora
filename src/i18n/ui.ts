@@ -18,6 +18,7 @@ const RUTAS = {
   proyectos: { es: 'proyectos', en: 'projects' },
   nosotros: { es: 'nosotros', en: 'about' },
   contacto: { es: 'contacto', en: 'contact' },
+  pqrs: { es: 'pqrs', en: 'pqrs' },
 } satisfies Record<string, Bilingue>;
 export type ClaveRuta = keyof typeof RUTAS;
 
@@ -27,9 +28,12 @@ export function ruta(idioma: Idioma, clave: ClaveRuta, ...resto: string[]) {
   return '/' + partes.join('/');
 }
 
+/** Ruta pública de una página: con build.format 'file', Astro incluye el .html en pathname al compilar. */
+export const rutaLimpia = (pathname: string) => pathname.replace(/(\/index)?\.html$/, '').replace(/\/$/, '') || '/';
+
 /** URL equivalente de la página actual en el otro idioma. */
 export function rutaEquivalente(pathname: string, destino: Idioma) {
-  const segmentos = pathname.split('/').filter(Boolean);
+  const segmentos = rutaLimpia(pathname).split('/').filter(Boolean);
   const origen: Idioma = segmentos[0] === 'en' ? 'en' : 'es';
   if (origen === 'en') segmentos.shift();
   const [primero, ...resto] = segmentos;
@@ -88,7 +92,7 @@ export function proyectoEn(p: CollectionEntry<'proyectos'>, idioma: Idioma) {
 
 const es = {
   saltar: 'Saltar al contenido',
-  menu: { servicios: 'Servicios', proyectos: 'Proyectos', nosotros: 'Nosotros', contacto: 'Contacto' },
+  menu: { servicios: 'Servicios', proyectos: 'Proyectos', nosotros: 'Nosotros', contacto: 'Contacto', pqrs: 'PQRS' },
   abrirMenu: 'Abrir menú',
   cotizar: 'Solicitar cotización',
   whatsapp: 'Escribir por WhatsApp',
@@ -102,6 +106,7 @@ const es = {
       `Desde ${anio} construimos obras civiles y prestamos servicios de consultoría, interventoría y laboratorio de suelos, concretos y pavimentos en el Urabá antioqueño y chocoano.`,
     verServicios: 'Ver servicios',
     tarjeta: 'Del estudio de suelos a la obra',
+    fotoAlt: 'Graderías del diamante de béisbol Catherine Ibargüen en construcción',
     serviciosTitulo: 'Construcción, interventoría y laboratorio en un solo lugar.',
     todosServicios: 'Todos los servicios',
     proyectosTitulo: 'Obras ejecutadas en la región.',
@@ -184,6 +189,43 @@ const es = {
     // Encabezados del mensaje de WhatsApp
     wa: { proyecto: 'Proyecto' },
   },
+  pqrs: {
+    descripcion: 'Presente sus peticiones, quejas, reclamos, sugerencias o felicitaciones a Ingesuelos Concalidad S.A.S.',
+    antetitulo: 'Atención al cliente',
+    titulo: 'Peticiones, quejas, reclamos y sugerencias.',
+    plazo: 'Su solicitud será radicada y respondida en un plazo máximo de 5 días hábiles.',
+    codigo: 'Código',
+    version: 'Versión',
+    emision: 'Fecha de emisión',
+    proceso: 'Proceso',
+    seccion1: '1. Datos del solicitante',
+    nombre: 'Nombre o razón social',
+    documento: 'NIT / C.C.',
+    telefono: 'Teléfono',
+    correo: 'Correo electrónico',
+    ayudaCorreo: 'Si lo indica, le enviaremos la confirmación con su número de radicado.',
+    direccion: 'Dirección',
+    municipio: 'Municipio',
+    proyecto: 'Proyecto / N.º de cotización o informe',
+    opcional: '(opcional)',
+    seccion2: '2. Tipo de solicitud',
+    seccion3: '3. Servicio relacionado',
+    otroCual: '¿Cuál?',
+    seccion4: '4. Descripción de la solicitud',
+    firma: 'Nombre del solicitante',
+    autoriza: 'Autorizo el tratamiento de mis datos personales conforme a la Ley 1581 de 2012.',
+    finalidad: 'Radicar, tramitar y responder su solicitud, y conservar los registros del Sistema de Gestión de la Calidad.',
+    enviar: 'Radicar solicitud',
+    enviando: 'Enviando…',
+    faltaOtro: 'Indique a qué otro servicio se refiere.',
+    esperar: 'Espere un momento a que termine la verificación de seguridad.',
+    error: 'No pudimos radicar su solicitud. Revise su conexión e inténtelo de nuevo.',
+    graciasTitulo: '¡Gracias por ayudarnos a mejorar!',
+    radicado: 'Su número de radicado es:',
+    graciasTexto: 'Guárdelo para hacer seguimiento. Le responderemos en un plazo máximo de 5 días hábiles.',
+    noDisponible: 'El formulario no está disponible en este momento. Puede presentar su solicitud por estos medios:',
+    pie: 'Documento propiedad de INGESUELOS. Su contenido es confidencial y está protegido por derechos de propiedad intelectual; se prohíbe su reproducción, copia o distribución total o parcial sin autorización escrita.',
+  },
   cta: {
     antetitulo: '¿Tiene un proyecto en mente?',
     titulo: 'Hagamos realidad su próxima obra.',
@@ -200,7 +242,7 @@ export type Textos = typeof es;
 
 const en: Textos = {
   saltar: 'Skip to content',
-  menu: { servicios: 'Services', proyectos: 'Projects', nosotros: 'About us', contacto: 'Contact' },
+  menu: { servicios: 'Services', proyectos: 'Projects', nosotros: 'About us', contacto: 'Contact', pqrs: 'PQRS' },
   abrirMenu: 'Open menu',
   cotizar: 'Request a quote',
   whatsapp: 'Message us on WhatsApp',
@@ -214,6 +256,7 @@ const en: Textos = {
       `Since ${anio} we have been building civil works and providing consulting, construction supervision and soil, concrete and pavement laboratory services across the Urabá region of Antioquia and Chocó.`,
     verServicios: 'Our services',
     tarjeta: 'From soil study to finished work',
+    fotoAlt: 'Grandstands of the Catherine Ibargüen baseball field under construction',
     serviciosTitulo: 'Construction, supervision and laboratory in one place.',
     todosServicios: 'All services',
     proyectosTitulo: 'Projects completed in the region.',
@@ -292,6 +335,43 @@ const en: Textos = {
     direccion: 'Address',
     pais: 'Colombia',
     wa: { proyecto: 'Project' },
+  },
+  pqrs: {
+    descripcion: 'Submit your requests, complaints, claims, suggestions or compliments to Ingesuelos Concalidad S.A.S.',
+    antetitulo: 'Customer care',
+    titulo: 'Requests, complaints, claims and suggestions.',
+    plazo: 'Your submission will be logged and answered within a maximum of 5 business days.',
+    codigo: 'Code',
+    version: 'Version',
+    emision: 'Issue date',
+    proceso: 'Process',
+    seccion1: '1. Your details',
+    nombre: 'Name or company name',
+    documento: 'Tax ID / ID number',
+    telefono: 'Phone',
+    correo: 'Email',
+    ayudaCorreo: 'If provided, we will email you a confirmation with your tracking number.',
+    direccion: 'Address',
+    municipio: 'City',
+    proyecto: 'Project / quote or report number',
+    opcional: '(optional)',
+    seccion2: '2. Type of submission',
+    seccion3: '3. Related service',
+    otroCual: 'Please specify',
+    seccion4: '4. Description',
+    firma: 'Name of the person submitting',
+    autoriza: 'I authorize the processing of my personal data in accordance with Colombian Law 1581 of 2012.',
+    finalidad: 'To log, process and answer your submission, and to keep the records of our Quality Management System.',
+    enviar: 'Submit',
+    enviando: 'Sending…',
+    faltaOtro: 'Please specify which other service this refers to.',
+    esperar: 'Please wait a moment for the security check to finish.',
+    error: 'We could not log your submission. Please check your connection and try again.',
+    graciasTitulo: 'Thank you for helping us improve!',
+    radicado: 'Your tracking number is:',
+    graciasTexto: 'Keep it for follow-up. We will reply within a maximum of 5 business days.',
+    noDisponible: 'The form is not available right now. You can reach us through these channels:',
+    pie: 'Document owned by INGESUELOS. Its content is confidential and protected by intellectual property rights; total or partial reproduction, copying or distribution without written authorization is prohibited.',
   },
   cta: {
     antetitulo: 'Have a project in mind?',

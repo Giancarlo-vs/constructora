@@ -1,0 +1,41 @@
+---
+// Aviso de privacidad (Ley 1581 de 2012) de los formularios que recogen datos personales.
+import { empresa } from '../data/empresa';
+import { correoDatos } from '../data/encuesta';
+import { idiomaActual } from '../i18n/ui';
+
+interface Props {
+  finalidad: string;
+}
+const { finalidad } = Astro.props;
+const idioma = idiomaActual(Astro.currentLocale);
+const t = {
+  es: {
+    ver: 'Ver aviso de privacidad',
+    responsable: 'Responsable',
+    correo: 'Correo',
+    finalidad: 'Finalidad',
+    derechos: 'Sus derechos',
+    detalle: 'puede conocer, actualizar, rectificar o suprimir sus datos y revocar esta autorización escribiendo al correo indicado.',
+  },
+  en: {
+    ver: 'View privacy notice',
+    responsable: 'Data controller',
+    correo: 'Email',
+    finalidad: 'Purpose',
+    derechos: 'Your rights',
+    detalle: 'you may access, update, correct or delete your data and revoke this authorization by writing to the email above.',
+  },
+}[idioma];
+---
+
+<details class="text-xs text-muted">
+  <summary class="cursor-pointer font-medium">{t.ver}</summary>
+  <div class="mt-2 space-y-2 leading-relaxed">
+    <p>
+      <strong>{t.responsable}:</strong> {empresa.nombre}, NIT {empresa.nit}, {empresa.direccion}, {empresa.ciudad}. {t.correo}: {correoDatos}.
+    </p>
+    <p><strong>{t.finalidad}:</strong> {finalidad}</p>
+    <p><strong>{t.derechos}:</strong> {t.detalle}</p>
+  </div>
+</details>

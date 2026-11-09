@@ -1,0 +1,62 @@
+---
+// Herramienta interna: arma el enlace personalizado y abre WhatsApp con el mensaje listo.
+import Layout from '../../layouts/Layout.astro';
+import Encabezado from '../../components/Encabezado.astro';
+import { empresa } from '../../data/empresa';
+
+const base = new URL('/encuesta', Astro.site).href;
+---
+
+<Layout titulo="Enviar encuesta" descripcion="Herramienta interna para enviar la encuesta de satisfacción." interna>
+  <Encabezado antetitulo="Uso interno" titulo="Enviar encuesta" texto="Llene los datos y se abrirá WhatsApp con el mensaje listo para enviar." />
+
+  <section class="contenedor max-w-3xl! pb-24">
+    <form id="enviar" class="grid gap-5 rounded-3xl bg-sand/60 p-6 sm:p-10">
+      <label class="campo">
+        <span>Cliente</span>
+        <input name="cliente" required />
+      </label>
+      <label class="campo">
+        <span>Proyecto</span>
+        <input name="proyecto" required />
+      </label>
+      <label class="campo">
+        <span>Celular del cliente <em>(opcional: si lo deja vacío, elige el contacto en WhatsApp)</em></span>
+        <input name="celular" type="tel" inputmode="numeric" placeholder="300 000 0000" />
+      </label>
+      <div class="flex flex-wrap gap-3">
+        <button type="submit" class="btn btn-primary">Abrir WhatsApp</button>
+        <button type="button" id="copiar" class="btn btn-ghost">Copiar enlace</button>
+      </div>
+      <p id="estado" role="status" class="break-all text-sm text-muted"></p>
+    </form>
+  </section>
+</Layout>
+
+<script is:inline define:vars={{ base, nombre: empresa.nombre }}>
+  const form = document.getElementById('enviar');
+  const estado = document.getElementById('estado');
+
+  const enlace = () => {
+    const url = new URL(base);
+    url.searchParams.set('cliente', form.elements.cliente.value.trim());
+    url.searchParams.set('proyecto', form.elements.proyecto.value.trim());
+    return url.href;
+  };
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const digitos = form.elements.celular.value.replace(/\D/g, '');
+    const numero = digitos.length === 10 ? `57${digitos}` : digitos;
+    const mensaje =
+      `Hola, ${form.elements.cliente.value.trim()}. En ${nombre} queremos conocer su opinión sobre el proyecto ` +
+      `${form.elements.proyecto.value.trim()}. Responder le tomará menos de 2 minutos: ${enlace()}`;
+    window.open(`https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`, '_blank', 'noopener');
+  });
+
+  document.getElementById('copiar').addEventListener('click', async () => {
+    if (!form.reportValidity()) return;
+    await navigator.clipboard.writeText(enlace());
+    estado.textContent = `Enlace copiado: ${enlace()}`;
+  });
+</script>

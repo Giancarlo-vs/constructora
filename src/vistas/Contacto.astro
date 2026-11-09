@@ -114,17 +114,3 @@ const mensaje = {
     </script>
   )
 }
-
-<style>
-  @reference "../styles/global.css";
-
-  .campo {
-    @apply flex flex-col gap-2 text-sm font-medium;
-  }
-  .campo em {
-    @apply font-normal not-italic text-muted;
-  }
-  .campo :is(input, select, textarea) {
-    @apply w-full rounded-xl border-0 bg-paper px-4 py-3 text-base font-normal ring-1 ring-ink/15 transition-shadow outline-none focus:ring-2 focus:ring-clay;
-  }
-</style>

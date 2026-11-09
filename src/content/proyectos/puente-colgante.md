@@ -7,6 +7,8 @@ orden: 3
 alcance:
   - Estructura en acero
   - Tablero en madera
+portadaReducida: true
+portada: ./fotos/puente-colgante.jpg
 en:
   titulo: "Steel and timber suspension bridge"
   resumen: "Pedestrian suspension bridge with a steel structure and timber deck."

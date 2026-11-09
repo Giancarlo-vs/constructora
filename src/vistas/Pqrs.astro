@@ -1,0 +1,233 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Encabezado from '../components/Encabezado.astro';
+import AvisoPrivacidad from '../components/AvisoPrivacidad.astro';
+import { empresa, telefonoHref, whatsappUrl } from '../data/empresa';
+import { conexion } from '../data/encuesta';
+import { formatoPqrs, serviciosPqrs, tiposPqrs } from '../data/pqrs';
+import { idiomaActual, textos } from '../i18n/ui';
+
+const idioma = idiomaActual(Astro.currentLocale);
+const t = textos[idioma];
+const p = t.pqrs;
+
+// Clave de pruebas de Cloudflare para el servidor de desarrollo.
+const claveTurnstile = import.meta.env.DEV ? '1x00000000000000000000AA' : conexion.turnstile;
+const disponible = import.meta.env.DEV || Boolean(conexion.endpoint && conexion.turnstile);
+
+const mensajes = { faltaOtro: p.faltaOtro, esperar: p.esperar, error: p.error, enviando: p.enviando };
+const documento = { formato: formatoPqrs.codigo, version: formatoPqrs.version, idioma };
+---
+
+<Layout titulo={t.menu.pqrs} descripcion={p.descripcion}>
+  <Encabezado antetitulo={p.antetitulo} titulo={p.titulo} texto={p.plazo}>
+    <p class="mt-4 text-xs text-muted">
+      {p.codigo}: {formatoPqrs.codigo} · {p.version}: {formatoPqrs.version} · {p.emision}: {formatoPqrs.emision} · {p.proceso}: {formatoPqrs.proceso[idioma]}
+    </p>
+  </Encabezado>
+
+  <section class="contenedor pb-20">
+    <div class="max-w-3xl">
+      {
+        !disponible ? (
+          <div class="rounded-2xl bg-sand/60 p-6">
+            <p>{p.noDisponible}</p>
+            <ul class="mt-3 space-y-1 font-medium">
+              <li><a class="hover:text-clay" href={whatsappUrl(t.whatsappMensaje)} target="_blank" rel="noopener">WhatsApp: {empresa.telefonos[1].numero}</a></li>
+              <li><a class="hover:text-clay" href={telefonoHref(empresa.telefonos[0].numero)}>{empresa.telefonos[0].numero}</a></li>
+              <li><a class="hover:text-clay break-all" href={`mailto:${empresa.email}`}>{empresa.email}</a></li>
+            </ul>
+          </div>
+        ) : (
+          <>
+            <form id="pqrs" class="space-y-10">
+              <noscript>
+                <p class="rounded-2xl bg-sand/60 p-6">{p.noDisponible} {empresa.email}</p>
+              </noscript>
+
+              <div>
+                <h2 class="text-xl font-semibold">{p.seccion1}</h2>
+                <div class="mt-4 grid gap-5 rounded-3xl bg-sand/60 p-6 sm:grid-cols-2 sm:p-8">
+                  <label class="campo">
+                    <span>{p.nombre}</span>
+                    <input name="nombre" required maxlength="150" autocomplete="organization" />
+                  </label>
+                  <label class="campo">
+                    <span>{p.documento}</span>
+                    <input name="documento" required maxlength="30" />
+                  </label>
+                  <label class="campo">
+                    <span>{p.telefono}</span>
+                    <input name="telefono" type="tel" required maxlength="40" autocomplete="tel" />
+                  </label>
+                  <label class="campo">
+                    <span>{p.correo} <em>{p.opcional}</em></span>
+                    <input name="correo" type="email" maxlength="150" autocomplete="email" />
+                    <small class="text-xs font-normal text-muted">{p.ayudaCorreo}</small>
+                  </label>
+                  <label class="campo">
+                    <span>{p.direccion} <em>{p.opcional}</em></span>
+                    <input name="direccion" maxlength="200" autocomplete="street-address" />
+                  </label>
+                  <label class="campo">
+                    <span>{p.municipio} <em>{p.opcional}</em></span>
+                    <input name="municipio" maxlength="100" autocomplete="address-level2" />
+                  </label>
+                  <label class="campo sm:col-span-2">
+                    <span>{p.proyecto} <em>{p.opcional}</em></span>
+                    <input name="proyecto" maxlength="200" />
+                  </label>
+                </div>
+              </div>
+
+              <fieldset>
+                <legend class="text-xl font-semibold">{p.seccion2}</legend>
+                <div class="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+                  {
+                    tiposPqrs.map((tipo) => (
+                      <label class="tipo">
+                        <input type="radio" class="sr-only" name="tipo" value={tipo.valor} required />
+                        <span class="font-semibold">{tipo.texto[idioma]}</span>
+                        <small>{tipo.ayuda[idioma]}</small>
+                      </label>
+                    ))
+                  }
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <legend class="text-xl font-semibold">{p.seccion3}</legend>
+                <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                  {
+                    serviciosPqrs.map((s) => (
+                      <label class="flex items-center gap-3 text-sm">
+                        <input type="radio" name="servicio" value={s.valor} required class="size-5 shrink-0 accent-clay" />
+                        <span>{s.texto[idioma]}</span>
+                      </label>
+                    ))
+                  }
+                </div>
+                <label class="campo otro mt-4 max-w-md">
+                  <span>{p.otroCual}</span>
+                  <input name="servicioOtro" maxlength="100" />
+                </label>
+              </fieldset>
+
+              <label class="campo">
+                <span class="font-display text-xl font-semibold">{p.seccion4}</span>
+                <textarea name="descripcion" rows="6" required maxlength="4000"></textarea>
+              </label>
+
+              <div class="space-y-4 rounded-3xl bg-sand/60 p-6 sm:p-8">
+                <label class="campo">
+                  <span>{p.firma}</span>
+                  <input name="firma" required maxlength="150" autocomplete="name" />
+                </label>
+                <label class="flex items-start gap-3 text-sm">
+                  <input type="checkbox" name="autoriza" required class="mt-0.5 size-5 shrink-0 accent-clay" />
+                  <span>{p.autoriza}</span>
+                </label>
+                <AvisoPrivacidad finalidad={p.finalidad} />
+              </div>
+
+              <!-- Trampa para robots: las personas no ven este campo. -->
+              <input type="text" name="sitio" tabindex="-1" autocomplete="off" aria-hidden="true" class="absolute -left-[9999px]" />
+
+              <div class="cf-turnstile" data-sitekey={claveTurnstile} data-language={idioma}></div>
+
+              <div>
+                <button type="submit" class="btn btn-primary">{p.enviar}</button>
+                <p id="estado" role="status" class="mt-3 text-sm font-medium text-clay"></p>
+              </div>
+            </form>
+
+            <div id="gracias" hidden class="rounded-3xl bg-sand/60 p-8 text-center sm:p-12">
+              <h2 class="text-3xl font-bold text-clay">{p.graciasTitulo}</h2>
+              <p class="mt-5 text-muted">{p.radicado}</p>
+              <p id="radicado" class="mt-1 font-display text-3xl font-bold"></p>
+              <p class="mt-5 text-muted">{p.graciasTexto}</p>
+            </div>
+          </>
+        )
+      }
+
+      <p class="mt-12 text-center text-xs italic text-muted">{p.pie}</p>
+    </div>
+  </section>
+</Layout>
+
+{
+  disponible && (
+    <>
+      <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
+      <script is:inline define:vars={{ endpoint: conexion.endpoint, documento, mensajes }}>
+        const form = document.getElementById('pqrs');
+        const estado = document.getElementById('estado');
+        const boton = form.querySelector('button[type=submit]');
+
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const datos = Object.fromEntries(new FormData(form));
+          if (datos.servicio === 'Otro' && !datos.servicioOtro.trim()) {
+            estado.textContent = mensajes.faltaOtro;
+            form.elements.servicioOtro.focus();
+            return;
+          }
+          const turnstile = datos['cf-turnstile-response'];
+          if (!turnstile) {
+            estado.textContent = mensajes.esperar;
+            return;
+          }
+          delete datos['cf-turnstile-response'];
+
+          boton.disabled = true;
+          estado.textContent = mensajes.enviando;
+          try {
+            // text/plain evita la consulta previa CORS, que Apps Script no responde.
+            const respuesta = await fetch(endpoint, {
+              method: 'POST',
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+              body: JSON.stringify({ ...datos, ...documento, turnstile, registro: 'pqrs', autoriza: datos.autoriza === 'on' }),
+            });
+            const resultado = await respuesta.json();
+            if (!resultado.ok) throw new Error(resultado.error);
+            document.getElementById('radicado').textContent = resultado.radicado;
+            form.hidden = true;
+            document.getElementById('gracias').hidden = false;
+            scrollTo(0, 0);
+          } catch {
+            estado.textContent = mensajes.error;
+            boton.disabled = false;
+            window.turnstile?.reset();
+          }
+        });
+      </script>
+    </>
+  )
+}
+
+<style>
+  @reference "../styles/global.css";
+
+  .tipo {
+    @apply flex cursor-pointer flex-col gap-1 rounded-2xl p-4 text-sm ring-1 ring-ink/15 transition-colors select-none hover:bg-sand;
+  }
+  .tipo small {
+    @apply text-xs leading-snug text-muted;
+  }
+  .tipo:has(:checked) {
+    @apply bg-ink text-paper ring-ink;
+  }
+  .tipo:has(:checked) small {
+    @apply text-paper/70;
+  }
+  .tipo:has(:focus-visible) {
+    @apply outline-2 outline-offset-2 outline-clay;
+  }
+  .otro {
+    display: none;
+  }
+  fieldset:has(input[value='Otro']:checked) .otro {
+    display: flex;
+  }
+</style>

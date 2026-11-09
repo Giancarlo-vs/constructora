@@ -72,6 +72,8 @@ const proyectos = defineCollection({
         .optional(),
       // Fotos opcionales: si no hay portada se muestra una ilustración de estratos.
       portada: image().optional(),
+      // Foto de baja resolución real: se muestra en un recuadro menor. Quitar al tener la original.
+      portadaReducida: z.boolean().default(false),
       galeria: z.array(image()).default([]),
     }),
 });

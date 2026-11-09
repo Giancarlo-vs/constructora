@@ -2,17 +2,19 @@
 import Logo from './Logo.astro';
 import BotonTema from './BotonTema.astro';
 import BotonIdioma from './BotonIdioma.astro';
-import { idiomaActual, ruta, textos } from '../i18n/ui';
+import { idiomaActual, ruta, rutaLimpia, textos } from '../i18n/ui';
 
+const { sinIdioma = false } = Astro.props;
 const idioma = idiomaActual(Astro.currentLocale);
 const t = textos[idioma];
 const enlaces = [
   { href: ruta(idioma, 'servicios'), texto: t.menu.servicios },
   { href: ruta(idioma, 'proyectos'), texto: t.menu.proyectos },
   { href: ruta(idioma, 'nosotros'), texto: t.menu.nosotros },
+  { href: ruta(idioma, 'pqrs'), texto: t.menu.pqrs },
 ];
 const contacto = ruta(idioma, 'contacto');
-const actual = Astro.url.pathname.replace(/\/$/, '');
+const actual = rutaLimpia(Astro.url.pathname);
 const activo = (href: string) => actual === href || actual.startsWith(href + '/');
 ---
 
@@ -20,7 +22,7 @@ const activo = (href: string) => actual === href || actual.startsWith(href + '/'
   <div class="contenedor flex h-16 items-center justify-between">
     <Logo />
 
-    <nav class="hidden items-center gap-6 text-sm font-medium md:flex" aria-label="Principal">
+    <nav class="hidden items-center gap-6 text-sm font-medium lg:flex" aria-label="Principal">
       {
         enlaces.map((e) => (
           <a
@@ -33,14 +35,14 @@ const activo = (href: string) => actual === href || actual.startsWith(href + '/'
         ))
       }
       <div class="flex items-center gap-2">
-        <BotonIdioma />
+        {!sinIdioma && <BotonIdioma />}
         <BotonTema />
       </div>
       <a href={contacto} class="btn btn-primary">{t.cotizar}</a>
     </nav>
 
-    <div class="flex items-center gap-2 md:hidden">
-      <BotonIdioma />
+    <div class="flex items-center gap-2 lg:hidden">
+      {!sinIdioma && <BotonIdioma />}
       <BotonTema />
       <!-- Menú móvil sin JavaScript -->
       <details class="group relative">

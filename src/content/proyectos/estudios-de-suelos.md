@@ -8,6 +8,15 @@ alcance:
   - Apiques y toma de muestras
   - Ensayos a cilindros de concreto
   - Densidades en campo
+portadaReducida: true
+portada: ./fotos/estudio-sondeo.jpg
+galeria:
+  - ./fotos/estudio-sondeo-agua.jpg
+  - ./fotos/estudio-apique.jpg
+  - ./fotos/ensayo-densidad-campo.jpg
+  - ./fotos/ensayo-cilindros.jpg
+  - ./fotos/ensayo-hidrometro.jpg
+  - ./fotos/ensayo-falla-cilindro.jpg
 en:
   titulo: "Soil studies and quality control"
   resumen: "Borings, test pits and laboratory testing for works in the region."

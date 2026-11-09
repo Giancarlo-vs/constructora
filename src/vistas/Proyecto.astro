@@ -16,7 +16,7 @@ interface Props {
 const { proyecto, todos } = Astro.props;
 const idioma = idiomaActual(Astro.currentLocale);
 const t = textos[idioma].proyectos;
-const { titulo, resumen, categoria, nombreCategoria, ubicacion, anio, cliente, alcance, portada, galeria, descripcion } =
+const { titulo, resumen, categoria, nombreCategoria, ubicacion, anio, cliente, alcance, portada, portadaReducida, galeria, descripcion } =
   proyectoEn(proyecto, idioma);
 const { Content } = await render(proyecto);
 
@@ -46,7 +46,7 @@ const relacionados = todos
     </header>
 
     <div class="contenedor">
-      <div class="aspect-2/1 overflow-hidden rounded-3xl bg-sand">
+      <div class:list={['overflow-hidden rounded-3xl bg-sand', portadaReducida ? 'aspect-4/3 max-w-xl' : 'aspect-2/1']}>
         <Portada imagen={portada} alt={titulo} semilla={proyecto.id} sizes="(min-width: 1152px) 1152px, 100vw" prioridad />
       </div>
     </div>

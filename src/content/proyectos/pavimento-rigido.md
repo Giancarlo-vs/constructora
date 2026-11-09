@@ -3,6 +3,8 @@ titulo: Pavimento rígido
 resumen: Construcción de pavimento en concreto hidráulico.
 categoria: Vías
 orden: 7
+portadaReducida: true
+portada: ./fotos/pavimento-rigido.jpg
 en:
   titulo: "Rigid pavement"
   resumen: "Construction of hydraulic concrete pavement."

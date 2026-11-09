@@ -3,6 +3,8 @@ titulo: Pavimento en asfalto
 resumen: Extendido y compactación de mezcla asfáltica.
 categoria: Vías
 orden: 8
+portadaReducida: true
+portada: ./fotos/pavimento-asfalto.jpg
 en:
   titulo: "Asphalt pavement"
   resumen: "Laying and compaction of asphalt mix."

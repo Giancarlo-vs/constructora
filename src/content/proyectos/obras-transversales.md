@@ -3,6 +3,8 @@ titulo: Obras transversales
 resumen: Instalación de alcantarillas y obras de drenaje transversal en vías.
 categoria: Vías
 orden: 10
+portadaReducida: true
+portada: ./fotos/obras-transversales.jpg
 en:
   titulo: "Cross drainage works"
   resumen: "Installation of culverts and cross drainage structures on roads."

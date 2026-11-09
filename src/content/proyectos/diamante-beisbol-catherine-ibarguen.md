@@ -8,6 +8,13 @@ orden: 1
 alcance:
   - Estructura en concreto
   - Graderías
+portada: ./fotos/diamante-tribuna.jpg
+galeria:
+  - ./fotos/diamante-campo.jpg
+  - ./fotos/diamante-graderias-obra.jpg
+  - ./fotos/diamante-interior.jpg
+  - ./fotos/diamante-exterior.jpg
+  - ./fotos/diamante-graderias-avance.jpg
 en:
   titulo: "Catherine Ibargüen Baseball Field"
   resumen: "Construction of the baseball venue, with a concrete structure and grandstands."
