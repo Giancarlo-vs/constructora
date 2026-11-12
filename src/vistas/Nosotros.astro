@@ -1,9 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Encabezado from '../components/Encabezado.astro';
-import Estratos from '../components/Estratos.astro';
 import LlamadoAccion from '../components/LlamadoAccion.astro';
 import { empresa } from '../data/empresa';
+import logo from '../assets/logo.png';
 import { idiomaActual, textos } from '../i18n/ui';
 
 const idioma = idiomaActual(Astro.currentLocale);
@@ -15,8 +15,9 @@ const n = t.nosotros;
   <Encabezado antetitulo={t.menu.nosotros} titulo={n.titulo} texto={n.texto(empresa.nombre, empresa.fundacion)} />
 
   <section class="contenedor grid items-center gap-12 pb-24 lg:grid-cols-2">
-    <div class="aspect-4/3 overflow-hidden rounded-3xl bg-sand">
-      <Estratos semilla="nosotros" class="h-full w-full" />
+    <!-- Fondo blanco también en modo oscuro: el logo original es para fondo claro. -->
+    <div class="flex aspect-4/3 items-center justify-center rounded-3xl bg-white p-6 shadow-2xl sm:p-10 shadow-ink/10 ring-1 ring-ink/5 dark:shadow-black/40">
+      <img src={logo.src} width={logo.width} height={logo.height} alt={empresa.nombre} class="h-auto w-4/5" />
     </div>
     <div class="prose prose-lg prose-stone dark:prose-invert">
       {n.parrafos(empresa.fundacion).map((p) => <p>{p}</p>)}
